@@ -33,7 +33,7 @@
   </div>
 
   <script>
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbx_L5OK4eZbTCAaoF_c3uWBKeVhfoTnUUEXSEMTPlYvPRo9YTRTCd99LIej92xG0wg1/exec';
+    const scriptUrl = 'https://sheetdb.io/api/v1/uah9uu407z0go'; // Your SheetDB API URL
 
     const timeslots = [
       "09:00–10:00",
@@ -43,8 +43,7 @@
       "16:00–17:00"
     ];
 
-    const bookingCounts = {}; // will track bookings per slot (simulate)
-
+    const bookingCounts = {}; // Simulate booking counts per slot
     const maxBookingsPerSlot = 3;
 
     const slotsContainer = document.getElementById("slots");
@@ -81,9 +80,16 @@
 
       try {
         await fetch(scriptUrl, {
-          redirect: "follow",
           method: 'POST',
-          body: JSON.stringify(data),
+          body: JSON.stringify({
+            data: {
+              name: data.name,
+              address: data.address,
+              phone: data.phone,
+              slot: data.slot,
+              notes: data.notes || ''
+            }
+          }),
           headers: { 'Content-Type': 'application/json' }
         });
 
