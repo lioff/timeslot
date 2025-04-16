@@ -2,97 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sensor Installation Booking</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .timeslot-btn {
-      margin: 5px;
-    }
-    .disabled-slot {
-      pointer-events: none;
-      opacity: 0.6;
-    }
-  </style>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
 </head>
 <body class="bg-light">
   <div class="container py-5">
-    <h2 class="mb-4">Book a Sensor Installation Slot</h2>
-    <form id="booking-form" class="needs-validation" novalidate>
-      <div class="mb-3">
-        <label for="name" class="form-label">Full Name</label>
-        <input required type="text" class="form-control" id="name" name="name" />
-      </div>
-      <div class="mb-3">
-        <label for="address" class="form-label">Address</label>
-        <input required type="text" class="form-control" id="address" name="address" />
-      </div>
-      <div class="mb-3">
-        <label for="phone" class="form-label">Phone Number</label>
-        <input required type="text" class="form-control" id="phone" name="phone" />
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Select a Time Slot</label>
-        <div id="slot-buttons" class="d-flex flex-wrap"></div>
-        <input type="hidden" name="slot" id="slot" required />
-      </div>
-      <div class="mb-3">
-        <label for="notes" class="form-label">Notes (optional)</label>
-        <textarea class="form-control" id="notes" name="notes"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary" id="submit-btn">Book Now</button>
-      <div id="status" class="mt-3"></div>
-    </form>
+    <h1 class="mb-4">Book a Sensor Installation Slot</h1>
+
+    <div id="slots" class="mb-5 row g-3"></div>
+
+    <div id="form-section" style="display:none">
+      <h2 class="mb-3">Your Details</h2>
+      <form id="booking-form" class="needs-validation" novalidate>
+        <input type="hidden" name="slot" id="slot-input" />
+
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input required name="name" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Address</label>
+          <input required name="address" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Phone Number</label>
+          <input required name="phone" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Notes (optional)</label>
+          <textarea name="notes" class="form-control"></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn">Book Slot</button>
+      </form>
+    </div>
+
+    <div id="confirmation" class="alert alert-success mt-4 d-none">
+      <strong>Thank you!</strong> Your booking was received.
+    </div>
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbx_L5OK4eZbTCAaoF_c3uWBKeVhfoTnUUEXSEMTPlYvPRo9YTRTCd99LIej92xG0wg1/exec';
-    const form = document.getElementById('booking-form');
-    const slotInput = document.getElementById('slot');
-    const status = document.getElementById('status');
-    const submitBtn = document.getElementById('submit-btn');
-
-    const availableSlots = [
-      "09:00–10:00", "10:00–11:00", "11:00–12:00",
-      "13:00–14:00", "14:00–15:00", "15:00–16:00",
+    const scriptUrl = 'https://sheetdb.io/api/v1/uah9uu407z0go';
+    const timeslots = [
+      "09:00–10:00",
+      "10:30–11:30",
+      "13:00–14:00",
+      "14:30–15:30",
       "16:00–17:00"
     ];
 
-    let selectedSlot = null;
+    const maxBookingsPerSlot = 3;
+    const bookingCounts = {}; // Simulated for now
 
-    function renderSlots(bookedCounts = {}) {
-      const container = document.getElementById('slot-buttons');
-      container.innerHTML = '';
-      availableSlots.forEach(slot => {
-        const count = bookedCounts[slot] || 0;
-        const isFull = count >= 3;
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `btn btn-outline-primary timeslot-btn ${isFull ? 'disabled-slot' : ''}`;
-        btn.textContent = `${slot}${count ? ` (${count}/3)` : ''}`;
-        btn.onclick = () => {
-          slotInput.value = slot;
-          document.querySelectorAll('.timeslot-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        };
-        container.appendChild(btn);
+    const slotsContainer = document.getElementById("slots");
+    const formSection = document.getElementById("form-section");
+    const form = document.getElementById("booking-form");
+    const slotInput = document.getElementById("slot-input");
+    const confirmation = document.getElementById("confirmation");
+    const submitBtn = document.getElementById("submit-btn");
+
+    function renderSlots() {
+      slotsContainer.innerHTML = '';
+      timeslots.forEach(slot => {
+        if ((bookingCounts[slot] || 0) >= maxBookingsPerSlot) return;
+
+        const col = document.createElement("div");
+        col.className = "col-md-6";
+        col.innerHTML = `
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">${slot}</h5>
+              <button class="btn btn-outline-primary" onclick="selectSlot('${slot}')">Book this slot</button>
+            </div>
+          </div>
+        `;
+        slotsContainer.appendChild(col);
       });
     }
 
-    async function fetchBookedSlots() {
-      try {
-        const res = await fetch('https://YOUR-PROXY-OR-BACKEND-URL/slots');
-        const data = await res.json();
-        const counts = {};
-        for (const entry of data.slots) {
-          counts[entry] = (counts[entry] || 0) + 1;
-        }
-        renderSlots(counts);
-      } catch (err) {
-        console.error('Could not fetch slot data', err);
-        renderSlots();
-      }
-    }
+    window.selectSlot = function (slot) {
+      formSection.style.display = 'block';
+      slotInput.value = slot;
+      window.scrollTo({ top: formSection.offsetTop, behavior: 'smooth' });
+    };
 
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -123,8 +123,31 @@
         submitBtn.disabled = false;
       });
     });
-
-    fetchBookedSlots();
+    
+    renderSlots();
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
