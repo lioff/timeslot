@@ -51,7 +51,7 @@
 
   <script>
     // Replace this with your AWS Lambda proxy URL
-    const proxyUrl = 'https://778i2sft8i.execute-api.eu-west-1.amazonaws.com/deploytimeslots/proxy';
+    const proxyUrl = 'https://ccff5cvjpcoajjeemmvr7sujhe0vhlnj.lambda-url.eu-west-1.on.aws/';
     const timeslots = [
       "09:00–10:00",
       "10:30–11:30",
@@ -106,10 +106,13 @@
       submitBtn.disabled = true;
 
       const formData = new FormData(form);
+      const plainData = Object.fromEntries(formData.entries());
 
       fetch(proxyUrl, {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(plainData)
       })
       .then(response => response.json())
       .then(data => {
@@ -117,7 +120,7 @@
         confirmation.classList.remove('d-none');
         confirmation.innerHTML = "<strong>Thank you!</strong> Your booking was received.";
         submitBtn.disabled = false;
-        fetchBookedSlots(); // refresh slot status
+        // fetchBookedSlots(); // refresh slot status
       })
       .catch(error => {
         console.error('Error!', error.message);
