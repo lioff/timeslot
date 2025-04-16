@@ -50,7 +50,8 @@
   </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbyH5W45Iz_RMcDtFoJmUTjNaAZuzjzZXtYTsn3OYk0BMHBGEw5GreaGEG8AseZzkrVr/exec';
+    // Replace this with your AWS Lambda proxy URL
+    const proxyUrl = 'https://your-api-id.execute-api.region.amazonaws.com/proxy';
     const timeslots = [
       "09:00–10:00",
       "10:30–11:30",
@@ -103,23 +104,25 @@
       }
 
       submitBtn.disabled = true;
-      status.textContent = "Submitting…";
 
       const formData = new FormData(form);
 
-      fetch(scriptURL, {
+      fetch(proxyUrl, {
         method: 'POST',
         body: formData
       })
-      .then(response => {
+      .then(response => response.json())
+      .then(data => {
         form.reset();
-        status.innerHTML = `<div class="alert alert-success">Thank you! Your booking was received.</div>`;
+        confirmation.classList.remove('d-none');
+        confirmation.innerHTML = "<strong>Thank you!</strong> Your booking was received.";
         submitBtn.disabled = false;
         fetchBookedSlots(); // refresh slot status
       })
       .catch(error => {
         console.error('Error!', error.message);
-        status.innerHTML = `<div class="alert alert-danger">There was an error. Please try again later.</div>`;
+        confirmation.classList.remove('d-none');
+        confirmation.innerHTML = "<strong>Error!</strong> There was an error. Please try again later.";
         submitBtn.disabled = false;
       });
     });
@@ -128,26 +131,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
