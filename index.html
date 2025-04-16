@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sensor Installation Booking</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    .slot { margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+    .slot.hidden { display: none; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Book a Sensor Installation Slot</h1>
+
+  <div id="slots"></div>
+
+  <div id="form-section" style="display:none">
+    <h2>Enter Your Details</h2>
+    <form id="booking-form">
+      <input type="hidden" name="slot" id="slot-input" />
+      <label>Name:<br><input required name="name" /></label><br><br>
+      <label>Address:<br><input required name="address" /></label><br><br>
+      <label>Phone Number:<br><input required name="phone" /></label><br><br>
+      <label>Notes:<br><textarea name="notes"></textarea></label><br><br>
+      <button type="submit">Book Slot</button>
+    </form>
+  </div>
+
+  <div id="confirmation" style="display:none">
+    <h2>Thank you! Your booking was received.</h2>
+  </div>
+
+  <script>
+    const scriptUrl = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE'; // replace with your actual Apps Script URL
+
+    const timeslots = [
+      "09:00–10:00",
+      "10:30–11:30",
+      "13:00–14:00",
+      "14:30–15:30",
+      "16:00–17:00"
+    ];
+
+    const bookingCounts = {}; // will track bookings per slot (simulate)
+
+    const maxBookingsPerSlot = 3;
+
+    const slotsContainer = document.getElementById("slots");
+    const formSection = document.getElementById("form-section");
+    const bookingForm = document.getElementById("booking-form");
+    const slotInput = document.getElementById("slot-input");
+    const confirmation = document.getElementById("confirmation");
+
+    function renderSlots() {
+      slotsContainer.innerHTML = '';
+      timeslots.forEach(slot => {
+        if ((bookingCounts[slot] || 0) >= maxBookingsPerSlot) return; // hide fully booked slots
+
+        const div = document.createElement("div");
+        div.className = "slot";
+        div.innerHTML = `
+          <strong>${slot}</strong><br>
+          <button onclick="selectSlot('${slot}')">Book this slot</button>
+        `;
+        slotsContainer.appendChild(div);
+      });
+    }
+
+    window.selectSlot = function(slot) {
+      formSection.style.display = 'block';
+      slotInput.value = slot;
+      window.scrollTo({ top: formSection.offsetTop, behavior: 'smooth' });
+    };
+
+    bookingForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(bookingForm);
+      const data = Object.fromEntries(formData.entries());
+
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        bookingCounts[data.slot] = (bookingCounts[data.slot] || 0) + 1;
+        formSection.style.display = 'none';
+        confirmation.style.display = 'block';
+        renderSlots();
+      } catch (err) {
+        alert("Booking failed. Please try again.");
+      }
+    });
+
+    renderSlots();
+  </script>
+</body>
+</html>
