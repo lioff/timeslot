@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sensor Installation Booking</title>
+  <title>Timeslot for noise sensor installation</title>
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
     rel="stylesheet"
@@ -11,7 +11,7 @@
 </head>
 <body class="bg-light">
   <div class="container py-5">
-    <h1 class="mb-4">Book a Sensor Installation Slot</h1>
+    <h1 class="mb-4">Choose a timeslot for the noise sensor installation</h1>
 
     <div id="slots" class="mb-5 row g-3"></div>
 
@@ -45,72 +45,96 @@
     </div>
 
     <div id="confirmation" class="alert alert-success mt-4 d-none">
-      <strong>Thank you!</strong> Your booking was received.
+      
     </div>
   </div>
 
   <script>
-    // Replace this with your AWS Lambda proxy URL
     const proxyUrl = 'https://ccff5cvjpcoajjeemmvr7sujhe0vhlnj.lambda-url.eu-west-1.on.aws/';
+  
     const timeslots = [
-      "09:00–10:00",
-      "10:30–11:30",
-      "13:00–14:00",
-      "14:30–15:30",
-      "16:00–17:00"
+      { date: "2025-04-18", time: "09:00–10:00" },
+      { date: "2025-04-18", time: "10:30–11:30" },
+      { date: "2025-04-19", time: "13:00–14:00" },
+      { date: "2025-04-19", time: "14:30–15:30" },
+      { date: "2025-04-20", time: "16:00–17:00" }
     ];
-
+  
     const maxBookingsPerSlot = 3;
-    const bookingCounts = {}; // Simulated for now
-
+    const bookingCounts = {};
+  
     const slotsContainer = document.getElementById("slots");
     const formSection = document.getElementById("form-section");
     const form = document.getElementById("booking-form");
     const slotInput = document.getElementById("slot-input");
     const confirmation = document.getElementById("confirmation");
     const submitBtn = document.getElementById("submit-btn");
-
+  
     function renderSlots() {
       slotsContainer.innerHTML = '';
-      timeslots.forEach(slot => {
-        if ((bookingCounts[slot] || 0) >= maxBookingsPerSlot) return;
-
-        const col = document.createElement("div");
-        col.className = "col-md-6";
-        col.innerHTML = `
-          <div class="card shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">${slot}</h5>
-              <button class="btn btn-outline-primary" onclick="selectSlot('${slot}')">Book this slot</button>
+  
+      // Group slots by date
+      const grouped = {};
+      timeslots.forEach(({ date, time }) => {
+        const key = date;
+        if (!grouped[key]) grouped[key] = [];
+        if ((bookingCounts[`${date} ${time}`] || 0) < maxBookingsPerSlot) {
+          grouped[key].push(time);
+        }
+      });
+  
+      // Render each date group
+      Object.entries(grouped).forEach(([date, times]) => {
+        const group = document.createElement("div");
+        group.className = "mb-4";
+  
+        const header = document.createElement("h4");
+        header.textContent = new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  
+        const row = document.createElement("div");
+        row.className = "row g-3";
+  
+        times.forEach(time => {
+          const col = document.createElement("div");
+          col.className = "col-md-6";
+          col.innerHTML = `
+            <div class="card shadow-sm">
+              <div class="card-body">
+                <h5 class="card-title">${time}</h5>
+                <button class="btn btn-outline-primary" onclick="selectSlot('${date}', '${time}')">Book this slot</button>
+              </div>
             </div>
-          </div>
-        `;
-        slotsContainer.appendChild(col);
+          `;
+          row.appendChild(col);
+        });
+  
+        group.appendChild(header);
+        group.appendChild(row);
+        slotsContainer.appendChild(group);
       });
     }
-
-    window.selectSlot = function (slot) {
+  
+    window.selectSlot = function (date, time) {
       formSection.style.display = 'block';
-      slotInput.value = slot;
+      slotInput.value = `${date} ${time}`;
       window.scrollTo({ top: formSection.offsetTop, behavior: 'smooth' });
     };
-
+  
     form.addEventListener('submit', e => {
       e.preventDefault();
-
+  
       if (!slotInput.value) {
         alert("Please select a timeslot.");
         return;
       }
-
+  
       submitBtn.disabled = true;
-
+  
       const formData = new FormData(form);
       const plainData = Object.fromEntries(formData.entries());
-
+  
       fetch(proxyUrl, {
         method: 'POST',
-        body: formData,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(plainData)
       })
@@ -118,7 +142,7 @@
       .then(data => {
         form.reset();
         confirmation.classList.remove('d-none');
-        confirmation.innerHTML = "<strong>Thank you!</strong> Your booking was received.";
+        confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved.";
         submitBtn.disabled = false;
         // fetchBookedSlots(); // refresh slot status
       })
@@ -129,8 +153,9 @@
         submitBtn.disabled = false;
       });
     });
-    
+  
     renderSlots();
   </script>
+  
 </body>
 </html>
