@@ -1,78 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Timeslot for noise sensor installation</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-  />
+  <title>Time slot for noise sensor installation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    @media (max-width: 767px) {
+      header div img {
+        height: 6rem !important;
+      }
+    }
+  </style>
 </head>
+
 <body class="bg-light">
-  <div class="container py-5">
-    <h1 class="mb-4">Choose a timeslot for the noise sensor installation</h1>
+  <header
+    style="background-image: url('small-header.png'); background-size: cover; background-position: center; color: white; padding: 0 0;">
+    <div class="container">
+      <img src="cityai-logo.png" class="d-inline-block" alt="CityAI Lab Logo"
+        style="max-width: 150px; height: auto;" />
+      <img src="TUDelft_logo_white.png" class="d-inline-block" alt="TU Delft Logo"
+        style="max-width: 250px; height: auto;" />
+    </div>
+  </header>
+  <div class="container py-4">
+    <h1 class="mb-4">Choose a time slot for the noise sensor installation</h1>
+    <div class="row">
+      <div class="col-md-8">
+        <p>
+          Select a time slot during which we can visit you to mount the noise sensor at your house.<br>
+          With your support, we then look for a suitable location and install the sensor.
+        </p>
+        <p>
+          We kindly ask you to reserve a time slot of 2 hours, as we cannot guarantee the exact time of arrival.<br>
+          The installation itself is expected to take no longer than 30 minutes.
+        </p>
+      </div>
+      <div class="col-md-4 d-flex justify-content-center">
+        <div class="d-flex flex-row justify-content-between" style="gap: 10px;">
+          <img src="sensor-balcony.webp" alt="Noise Sensor" class="img-fluid"
+            style="max-width: 50%; height: auto; object-fit: cover;" />
+          <img src="sensor-terrace-1.webp" alt="Installation Process" class="img-fluid"
+            style="max-width: 50%; height: auto; object-fit: cover; padding-right: 10pt;" />
+        </div>
+      </div>
+    </div>
+
+    <br>
 
     <div id="slots" class="mb-5 row g-3"></div>
 
     <div id="form-section" style="display:none">
-      <h2 class="mb-3">Your Details</h2>
-      <form id="booking-form" class="needs-validation" novalidate>
-        <input type="hidden" name="slot" id="slot-input" />
+      <h2 class="mb-3">Confirm your Details</h2>
+      <form id="booking-form" class="needs-validation">
+        <div class="mb-3">
+          <label class="form-label">Date and time</label>
+          <input required name="slot" id="slot-input" class="form-control" readonly style="background-color: #eaeaea;" />
+        </div>
 
         <div class="mb-3">
           <label class="form-label">Name</label>
-          <input required name="name" class="form-control" />
+          <input required name="name" id="name" class="form-control" />
         </div>
 
         <div class="mb-3">
           <label class="form-label">Address</label>
-          <input required name="address" class="form-control" />
+          <input required name="address" id="address" class="form-control" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label">Phone Number</label>
+          <label class="form-label">Email address</label>
+          <input required type="email" name="email" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Phone number</label>
           <input required name="phone" class="form-control" />
+          <p><i>We will send you a reminder on the day of the installation.</i></p>
         </div>
 
         <div class="mb-3">
           <label class="form-label">Notes (optional)</label>
-          <textarea name="notes" class="form-control"></textarea>
+          <textarea name="notes" class="form-control"
+            placeholder="Anything that may be important to know for the appointment (not required)"></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary" id="submit-btn">Book Slot</button>
+
+
+        <div class="mb-3 form-check">
+          <label class="form-check-label" for="ConfirmCheckbox">
+            I will be home during the selected time slot or otherwise contact lcassens@tudelft.nl to reschedule or
+            cancel the appointment.
+          </label>
+          <input class="form-check-input" type="checkbox" value="" name="confirm" id="ConfirmCheckbox" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn">Confirm time slot and details</button>
+        <br>
       </form>
+
+      <br>
     </div>
 
     <div id="confirmation" class="alert alert-success mt-4 d-none">
-      
+
     </div>
   </div>
 
   <script>
     const proxyUrl = 'https://ccff5cvjpcoajjeemmvr7sujhe0vhlnj.lambda-url.eu-west-1.on.aws/';
-  
+
     const timeslots = [
-      { date: "2025-04-18", time: "09:00–10:00" },
-      { date: "2025-04-18", time: "10:30–11:30" },
-      { date: "2025-04-19", time: "13:00–14:00" },
-      { date: "2025-04-19", time: "14:30–15:30" },
-      { date: "2025-04-20", time: "16:00–17:00" }
+      { date: "2025-05-06", time: "11:00–13:00" },
+      { date: "2025-05-06", time: "14:00–16:00" },
+      { date: "2025-05-06", time: "16:00–18:00" },
+      { date: "2025-05-06", time: "18:00–20:00" },
+
+      { date: "2025-05-07", time: "11:00–13:00" },
+      { date: "2025-05-07", time: "14:00–16:00" },
+      { date: "2025-05-07", time: "16:00–18:00" },
+      { date: "2025-05-07", time: "18:00–20:00" },
+
+      { date: "2025-05-08", time: "11:00–13:00" },
+      { date: "2025-05-08", time: "14:00–16:00" },
+      { date: "2025-05-08", time: "16:00–18:00" },
+      { date: "2025-05-08", time: "18:00–20:00" },
+
+      { date: "2025-05-09", time: "11:00–13:00" },
+      { date: "2025-05-09", time: "14:00–16:00" },
+      { date: "2025-05-09", time: "16:00–18:00" },
+      { date: "2025-05-09", time: "18:00–20:00" },
+
+      { date: "2025-05-12", time: "11:00–13:00" },
+      { date: "2025-05-12", time: "14:00–16:00" },
+      { date: "2025-05-12", time: "16:00–18:00" },
+      { date: "2025-05-12", time: "18:00–20:00" },
     ];
-  
+
     const maxBookingsPerSlot = 3;
     const bookingCounts = {};
-  
+
     const slotsContainer = document.getElementById("slots");
     const formSection = document.getElementById("form-section");
     const form = document.getElementById("booking-form");
     const slotInput = document.getElementById("slot-input");
     const confirmation = document.getElementById("confirmation");
     const submitBtn = document.getElementById("submit-btn");
-  
+
     function renderSlots() {
       slotsContainer.innerHTML = '';
-  
+
       // Group slots by date
       const grouped = {};
       timeslots.forEach(({ date, time }) => {
@@ -82,18 +161,18 @@
           grouped[key].push(time);
         }
       });
-  
+
       // Render each date group
       Object.entries(grouped).forEach(([date, times]) => {
         const group = document.createElement("div");
         group.className = "mb-4";
-  
+
         const header = document.createElement("h4");
         header.textContent = new Date(date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  
+
         const row = document.createElement("div");
         row.className = "row g-3";
-  
+
         times.forEach(time => {
           const col = document.createElement("div");
           col.className = "col-md-6";
@@ -101,61 +180,96 @@
             <div class="card shadow-sm">
               <div class="card-body">
                 <h5 class="card-title">${time}</h5>
-                <button class="btn btn-outline-primary" onclick="selectSlot('${date}', '${time}')">Book this slot</button>
+                <button class="btn btn-outline-primary" onclick="selectSlot('${date}', '${time}')">Reserve this slot</button>
               </div>
             </div>
           `;
           row.appendChild(col);
         });
-  
+
         group.appendChild(header);
         group.appendChild(row);
         slotsContainer.appendChild(group);
       });
     }
-  
+
     window.selectSlot = function (date, time) {
       formSection.style.display = 'block';
       slotInput.value = `${date} ${time}`;
       window.scrollTo({ top: formSection.offsetTop, behavior: 'smooth' });
     };
-  
+
     form.addEventListener('submit', e => {
       e.preventDefault();
-  
+
       if (!slotInput.value) {
         alert("Please select a timeslot.");
         return;
       }
-  
+
+      const requiredFields = ['name', 'address', 'email', 'phone', 'confirm'];
+      for (const field of requiredFields) {
+        const input = form.elements[field];
+        if (!input || (input.type === 'checkbox' ? !input.checked : !input.value.trim())) {
+          alert(`Please fill in the required field: ${field}`);
+          input.focus();
+          return;
+        }
+      }
+
       submitBtn.disabled = true;
-  
+
       const formData = new FormData(form);
       const plainData = Object.fromEntries(formData.entries());
-  
+
       fetch(proxyUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(plainData)
       })
-      .then(response => response.json())
-      .then(data => {
-        form.reset();
-        confirmation.classList.remove('d-none');
-        confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved.";
-        submitBtn.disabled = false;
-        // fetchBookedSlots(); // refresh slot status
-      })
-      .catch(error => {
-        console.error('Error!', error.message);
-        confirmation.classList.remove('d-none');
-        confirmation.innerHTML = "<strong>Error!</strong> There was an error. Please try again later.";
-        submitBtn.disabled = false;
-      });
+        .then(response => response.json())
+        .then(data => {
+          form.reset();
+          confirmation.classList.remove('d-none');
+          confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved.<br>We will send you a reminder on the day of the installation.";
+          submitBtn.disabled = false;
+          confirmation.focus();
+          confirmation.scrollIntoView({ behavior: 'smooth' });
+          formSection.style.display = 'none';
+          // fetchBookedSlots(); // refresh slot status
+        })
+        .catch(error => {
+          console.error('Error!', error.message);
+          confirmation.classList.remove('d-none');
+          confirmation.innerHTML = "<strong>Error!</strong> There was an error. Please try again later.";
+          confirmation.focus();
+          confirmation.scrollIntoView({ behavior: 'smooth' });
+          submitBtn.disabled = false;
+        });
     });
-  
+
     renderSlots();
+
+    function getQueryParams() {
+      const params = {};
+      window.location.search.slice(1).split('&').forEach(pair => {
+        const [key, value] = pair.split('=');
+        if (key) {
+          params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+        }
+      });
+      return params;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = getQueryParams();
+
+      if (params.name) document.getElementById('name').value = params.name;
+      if (params.address) document.getElementById('address').value = params.address;
+      if (params.address) document.getElementById('email').value = params.email;
+    });
   </script>
-  
+
 </body>
+
 </html>
