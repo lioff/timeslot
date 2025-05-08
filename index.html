@@ -50,7 +50,14 @@
 
     <br>
 
-    <div id="slots" class="mb-5 row g-3"></div>
+    <div class="alert alert-info" role="alert">
+      Do you have further questions or does none of the time slots work for you?<br>
+      Feel free to write us via <a href="mailto:L.Cassens@tudelft.nl">L.Cassens@tudelft.nl</a> or on WhatsApp via <a href="tel:+491743102748">+49 174 310 2748</a>.
+    </div>
+
+    <div id="slots" class="mb-5 row g-3">
+      <br>Checking available slots. Please wait...
+    </div>
 
     <div id="form-section" style="display:none">
       <h2 class="mb-3">Confirm your Details</h2>
@@ -84,10 +91,8 @@
         <div class="mb-3">
           <label class="form-label">Notes (optional)</label>
           <textarea name="notes" class="form-control"
-            placeholder="Anything that may be important to know for the appointment (not required)"></textarea>
+            placeholder="Anything that may be important to know for the appointment (optional). Perhaps you already have a location in mind? Do you think a ladder may be needed?"></textarea>
         </div>
-
-
 
         <div class="mb-3 form-check">
           <label class="form-check-label" for="ConfirmCheckbox">
@@ -112,51 +117,25 @@
   <script>
     const proxyUrl = 'https://ccff5cvjpcoajjeemmvr7sujhe0vhlnj.lambda-url.eu-west-1.on.aws/';
 
-    const timeslots = [
-      { date: "2025-05-08", time: "14:00–16:00" },
-      { date: "2025-05-08", time: "16:00–18:00" },
-      { date: "2025-05-08", time: "18:00–20:00" },
+    let timeslots = [];
 
-      { date: "2025-05-09", time: "14:00–16:00" },
-      { date: "2025-05-09", time: "16:00–18:00" },
-      { date: "2025-05-09", time: "18:00–20:00" },
-
-      { date: "2025-05-10", time: "11:00–13:00" },
-      { date: "2025-05-10", time: "14:00–16:00" },
-      { date: "2025-05-10", time: "16:00–18:00" },
-      { date: "2025-05-10", time: "18:00–20:00" },
-
-      { date: "2025-05-12", time: "11:00–13:00" },
-      { date: "2025-05-12", time: "16:00–18:00" },
-      { date: "2025-05-12", time: "18:00–20:00" },
-      
-      { date: "2025-05-13", time: "14:00–16:00" },
-      { date: "2025-05-13", time: "16:00–18:00" },
-      { date: "2025-05-13", time: "18:00–20:00" },
-
-      { date: "2025-05-14", time: "15:00–17:00" },
-      { date: "2025-05-14", time: "17:00–19:00" },
-      { date: "2025-05-14", time: "18:00–20:00" },
-
-      { date: "2025-05-15", time: "15:00–17:00" },
-      { date: "2025-05-15", time: "17:00–19:00" },
-      { date: "2025-05-15", time: "18:00–20:00" },
-
-      { date: "2025-05-16", time: "10:00–12:00" },
-      { date: "2025-05-16", time: "14:00–16:00" },
-      { date: "2025-05-16", time: "16:00–18:00" },
-      { date: "2025-05-16", time: "18:00–20:00" },
-
-      { date: "2025-05-17", time: "11:00–13:00" },
-      { date: "2025-05-17", time: "14:00–16:00" },
-      { date: "2025-05-17", time: "16:00–18:00" },
-      { date: "2025-05-17", time: "18:00–20:00" },
-
-      { date: "2025-05-19", time: "11:00–13:00" },
-      { date: "2025-05-19", time: "14:00–16:00" },
-      { date: "2025-05-19", time: "16:00–18:00" },
-      { date: "2025-05-19", time: "18:00–20:00" },
-    ];
+    fetch(`${proxyUrl}?route=get_slots`)
+      .then(response => response.json())
+      .then(data => {
+        timeslots = data.slots;
+        timeslots = timeslots.map(slot => {
+          const [date, time] = slot.split(' ');
+          return { date, time };
+        });
+        renderSlots();
+      })
+      .catch(error => {
+        console.error('Error fetching timeslots:', error);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'alert alert-danger';
+        errorMessage.textContent = 'Failed to load timeslots. Please try again later.';
+        slotsContainer.appendChild(errorMessage);
+    });
 
     const maxBookingsPerSlot = 3;
     const bookingCounts = {};
@@ -194,7 +173,7 @@
 
         times.forEach(time => {
           const col = document.createElement("div");
-          col.className = "col-md-6";
+          col.className = "col-md-4";
           col.innerHTML = `
             <div class="card shadow-sm">
               <div class="card-body">
@@ -238,6 +217,8 @@
 
       submitBtn.disabled = true;
 
+      submitted_slot = slotInput.value
+
       const formData = new FormData(form);
       const plainData = Object.fromEntries(formData.entries());
 
@@ -250,12 +231,12 @@
         .then(data => {
           form.reset();
           confirmation.classList.remove('d-none');
-          confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved.<br>We will send you a reminder on the day of the installation.";
+          confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved: <strong>" + submitted_slot + "</strong><br>We will send you a reminder on the day of the installation.";
           submitBtn.disabled = false;
           confirmation.focus();
           confirmation.scrollIntoView({ behavior: 'smooth' });
           formSection.style.display = 'none';
-          // fetchBookedSlots(); // refresh slot status
+          slotsContainer.style.display = 'none';
         })
         .catch(error => {
           console.error('Error!', error.message);
@@ -266,8 +247,6 @@
           submitBtn.disabled = false;
         });
     });
-
-    renderSlots();
 
     function getQueryParams() {
       const params = {};
