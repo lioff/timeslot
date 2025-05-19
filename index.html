@@ -231,7 +231,7 @@
         .then(data => {
           form.reset();
           confirmation.classList.remove('d-none');
-          confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved: <strong>" + submitted_slot + "</strong><br>After a quick check we'll confirm the appointment via WhatsApp or email.";
+          confirmation.innerHTML = "<strong>Thank you!</strong> Your timeslot has been saved: <strong>" + submitted_slot + "</strong><br><strong>After a quick check we'll confirm the appointment via WhatsApp or email.</strong>";
           submitBtn.disabled = false;
           confirmation.focus();
           confirmation.scrollIntoView({ behavior: 'smooth' });
